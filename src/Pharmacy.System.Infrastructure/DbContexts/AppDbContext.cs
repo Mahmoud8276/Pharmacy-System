@@ -1,0 +1,22 @@
+﻿using Pharmacy.System.Core.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+
+namespace Pharmacy.System.Infrastructure.DbContexts
+{
+    public class AppDbContext : IdentityDbContext<AppUser, UserRole, string>
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        }
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+    }
+}

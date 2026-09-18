@@ -1,0 +1,71 @@
+﻿using Pharmacy.System.Core.Dtos;
+using Pharmacy.System.Core.Dtos.AppUserDtos;
+using Pharmacy.System.Core.Models;
+using Pharmacy.System.Services.IServices;
+using Pharmacy.System.Services.Responses;
+using Pharmacy.System.Services.SpecificationParams;
+using Mapster;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+
+namespace Pharmacy.System.Services.Services
+{
+    public class UserService : IUserService
+    {
+        private readonly UserManager<AppUser> _userManager;
+        public UserService(UserManager<AppUser> userManager)
+        {
+            _userManager = userManager;
+        }
+
+
+        public async Task<Response> GetAllAsync(UserSpecParams specParams)
+        {
+            var usersCount = await _userManager.Users.Where(user=>
+            string.IsNullOrEmpty(specParams.UserName) ||
+            (user.FirstName+ ' ' +user.LastName).ToLower().Contains(specParams.UserName.ToLower())
+            ).CountAsync();
+
+            var users = await _userManager.Users.AsQueryable().Where(user =>
+            string.IsNullOrEmpty(specParams.UserName) ||
+            (user.FirstName + ' ' + user.LastName).ToLower().Contains(specParams.UserName.ToLower())
+            ).Skip((specParams.PageIndex-1) * specParams.PageSize)
+            .Take(specParams.PageSize)
+            .ToListAsync();
+
+
+            var usersData = users.Select(u =>
+            {
+                var userData = u.Adapt<UserDetailsDto>();
+                userData.Roles = _userManager.GetRolesAsync(u).Result.ToList();
+                return userData;
+            });
+
+            var pagination = new Pagination(
+                specParams.PageIndex,
+                specParams.PageSize,
+                usersCount,
+                usersData
+                );
+
+
+            return Response.Success(data: pagination);
+        }
+
+        public async Task<Response> GetByIdAsync(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if(user == null)
+                return Response.Fail(message: "User not found", 
+                    statusCode: (int)HttpStatusCode.NotFound);
+
+            var userData = user.Adapt<UserDetailsDto>();
+            userData.Roles = (await _userManager.GetRolesAsync(user)).ToList();
+            return Response.Success(data: userData);
+        }
+    }
+}

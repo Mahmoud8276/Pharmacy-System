@@ -17,6 +17,15 @@ namespace Pharmacy.System.Infrastructure.DbContexts
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
 
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductCategory> ProductCategories { get; set; }
+        public DbSet<ProductForm> ProductForms { get; set; }
+        public DbSet<ProductActiveIngredient> ProductActiveIngredients { get; set; }
+        public DbSet<ActiveIngredient> ActiveIngredients { get; set; }
+        public DbSet<BaseUnit> BaseUnits { get; set; }
+        public DbSet<Manufacturer> Manufacturers { get; set; }
+        public DbSet<PackagingUnit> PackagingUnits { get; set; }
+        public DbSet<ProductPackagingLevel> ProductPackagingLevels { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using Pharmacy.System.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Threading.Tasks;
+using Pharmacy.System.Core.Interfaces.IRepositories;
 
 namespace Pharmacy.System.Infrastructure.Repositories
 {
@@ -11,14 +12,19 @@ namespace Pharmacy.System.Infrastructure.Repositories
         private readonly AppDbContext _context;
 
         // private readonly Lazy<IProductRespositoy> _productRepositoty;
+        private readonly Lazy<IProductCategoryRepository> _productCategoryRepository;
+
+
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
 
-             //_productRepositoty = new Lazy<ProductRepository>(() => new ProductRepository(_context))
+            //_productRepositoty = new Lazy<IProductRepository>(() => new ProductRepository(_context));
+            _productCategoryRepository = new Lazy<IProductCategoryRepository>(() => new ProductCategoryRepository(_context));
         }
 
         // public IProductRepositoty ProductRepositoty => _productRepository.Value;
+        public IProductCategoryRepository ProductCategoryRepository => _productCategoryRepository.Value;
 
 
 

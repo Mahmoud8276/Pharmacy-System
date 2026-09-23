@@ -488,4 +488,3 @@ $RECYCLE.BIN/
 **/appsettings.Production.json
 
 src/Pharmacy.System.Api/wwwroot/files/UserImages/*
-src/Pharmacy.System.Infrastructure/Migrations/*

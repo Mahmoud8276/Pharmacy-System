@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using Pharmacy.System.Core.Options;
+using System.Text;
 
 namespace Pharmacy.System.Services.Services
 {
@@ -49,7 +50,7 @@ namespace Pharmacy.System.Services.Services
             };
             Claims.AddRange(UserRoles.Select(role=> new Claim(ClaimTypes.Role, role)));
 
-            var HashKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Key));
+            var HashKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key));
             var SigningCredintials = new SigningCredentials(HashKey, SecurityAlgorithms.HmacSha256);
 
             var tokenGenerator = new JwtSecurityToken(

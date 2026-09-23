@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
+using Pharmacy.System.Core.Interfaces.IRepositories;
 using System;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ namespace Pharmacy.System.Core.Interfaces
     {
         // Ex:
         // public IProductRepositoty ProductRepositoty { get; }
+        public IProductCategoryRepository ProductCategoryRepository { get; }
 
         public Task CompleteAsync();
         public Task<IDbContextTransaction> BeginTransactionAsync();

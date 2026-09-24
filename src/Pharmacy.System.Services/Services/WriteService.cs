@@ -89,7 +89,7 @@ namespace Pharmacy.System.Services.Services
 
             dto.Adapt(entity);
 
-            _repository.UpdateAsync(entity);
+            _repository.Update(entity);
             await _unitOfWork.CompleteAsync();
 
             await AfterUpdateAsync(entity, dto);
@@ -107,7 +107,7 @@ namespace Pharmacy.System.Services.Services
             if(!result.IsSuccess)
                 return result;
 
-            _repository.DeleteAsync(entity);
+            _repository.Delete(entity);
             await _unitOfWork.CompleteAsync();
 
             await AfterDeleteAsync(entity);

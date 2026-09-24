@@ -11,7 +11,7 @@ namespace Pharmacy.System.Infrastructure.Repositories
     {
         private readonly AppDbContext _context;
 
-        // private readonly Lazy<IProductRespositoy> _productRepositoty;
+        private readonly Lazy<IProductRepository> _productRepository;
         private readonly Lazy<IProductCategoryRepository> _productCategoryRepository;
 
 
@@ -19,11 +19,11 @@ namespace Pharmacy.System.Infrastructure.Repositories
         {
             _context = context;
 
-            //_productRepositoty = new Lazy<IProductRepository>(() => new ProductRepository(_context));
+            _productRepository = new Lazy<IProductRepository>(() => new ProductRepository(_context));
             _productCategoryRepository = new Lazy<IProductCategoryRepository>(() => new ProductCategoryRepository(_context));
         }
 
-        // public IProductRepositoty ProductRepositoty => _productRepository.Value;
+        public IProductRepository ProductRepository => _productRepository.Value;
         public IProductCategoryRepository ProductCategoryRepository => _productCategoryRepository.Value;
 
 

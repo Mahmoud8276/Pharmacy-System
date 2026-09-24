@@ -14,6 +14,8 @@ namespace Pharmacy.System.Services.ApplicatoinServicesConfig
              services.AddScoped<IEmailService, EmailService>();
              services.AddScoped<IUserService, UserService>();
 
+             services.AddScoped<IProductCategoryService, ProductCategoryService>();
+
             return services;
         }
     }

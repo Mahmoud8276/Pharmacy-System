@@ -7,8 +7,7 @@ namespace Pharmacy.System.Core.Interfaces
 {
     public interface IUnitOfWork : IAsyncDisposable
     {
-        // Ex:
-        // public IProductRepositoty ProductRepositoty { get; }
+        public IProductRepository ProductRepository { get; }
         public IProductCategoryRepository ProductCategoryRepository { get; }
 
         public Task CompleteAsync();

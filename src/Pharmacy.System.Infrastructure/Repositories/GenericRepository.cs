@@ -52,17 +52,17 @@ namespace Pharmacy.System.Infrastructure.Repositories
         }
 
 
-        public void DeleteAsync(TModel model)
+        public void Delete(TModel model)
         {
             _context.Set<TModel>().Remove(model);
         }
         
-        public void DeleteRangeAsync(IEnumerable<TModel> models)
+        public void DeleteRange(IEnumerable<TModel> models)
         {
             _context.Set<TModel>().RemoveRange(models);
         }
 
-        public void UpdateAsync(TModel model)
+        public void Update(TModel model)
         {
             _context.Set<TModel>().Update(model);
         }
@@ -72,9 +72,15 @@ namespace Pharmacy.System.Infrastructure.Repositories
             return await _context.Set<TModel>().Where(condition).ToListAsync();
         }
 
+        public async Task<bool> AnyAsync(Expression<Func<TModel, bool>> condition)
+        {
+            return await _context.Set<TModel>().AnyAsync(condition);
+        }
+
         public async Task<int> GetCountWithSpecAsync(ISpecification<TModel, TKey> spec)
         {
             return await SpecificationEvaluator<TModel, TKey>.GetQuery(_context.Set<TModel>().AsQueryable(), spec).CountAsync();
         }
+
     }
 }

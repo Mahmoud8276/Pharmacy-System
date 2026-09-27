@@ -15,6 +15,8 @@ namespace Pharmacy.System.Services.ApplicatoinServicesConfig
              services.AddScoped<IUserService, UserService>();
 
              services.AddScoped<IProductCategoryService, ProductCategoryService>();
+             services.AddScoped<IProductService, ProductService>();
+             services.AddScoped<IProductFormService, ProductFormService>();
 
             return services;
         }

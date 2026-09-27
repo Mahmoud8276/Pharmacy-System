@@ -9,6 +9,9 @@ namespace Pharmacy.System.Core.Interfaces
     {
         public IProductRepository ProductRepository { get; }
         public IProductCategoryRepository ProductCategoryRepository { get; }
+        public IManufactorerRepository ManufacturerRepository { get; }
+        public IProductFormRepository ProductFormRepository { get; }
+        public IBaseUnitRepository BaseUnitRepository { get; }
 
         public Task CompleteAsync();
         public Task<IDbContextTransaction> BeginTransactionAsync();

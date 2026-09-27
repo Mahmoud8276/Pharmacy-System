@@ -22,6 +22,7 @@ namespace Pharmacy.System.Infrastructure.DbContexts
         public DbSet<ProductForm> ProductForms { get; set; }
         public DbSet<ProductActiveIngredient> ProductActiveIngredients { get; set; }
         public DbSet<ActiveIngredient> ActiveIngredients { get; set; }
+        public DbSet<UnitFamily> UnitFamilies { get; set; }
         public DbSet<BaseUnit> BaseUnits { get; set; }
         public DbSet<Manufacturer> Manufacturers { get; set; }
         public DbSet<PackagingUnit> PackagingUnits { get; set; }

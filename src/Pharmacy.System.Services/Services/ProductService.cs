@@ -1,5 +1,6 @@
 ﻿using Mapster;
 using Microsoft.Extensions.Logging;
+using Pharmacy.System.Core.Dtos;
 using Pharmacy.System.Core.Dtos.ProductDtos;
 using Pharmacy.System.Core.Interfaces;
 using Pharmacy.System.Core.Models;
@@ -7,7 +8,9 @@ using Pharmacy.System.Services.Helpers;
 using Pharmacy.System.Services.IServices;
 using Pharmacy.System.Services.Responses;
 using Pharmacy.System.Services.SpecificationParams;
+using Pharmacy.System.Services.Specifications;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -26,12 +29,13 @@ namespace Pharmacy.System.Services.Services
             _logger = logger;
         }
 
-        private async Task<Response> ValidateProductDto(ProductDto dto)
+        private async Task<Response> ValidateProductDto(ProductDto dto, int? excludeProductId = null)
         {
-            if (await _unitOfWork.ProductRepository.AnyAsync(x => x.Barcode == dto.Barcode))
+            if (await _unitOfWork.ProductRepository.AnyAsync(x =>
+                    x.Barcode == dto.Barcode && (excludeProductId == null || x.Id != excludeProductId)))
             {
-                return Response.Fail(
-                    message: "Product barcode already exists!",
+                return Response.Fail
+                    (message: "Product barcode already exists!",
                     statusCode: (int)HttpStatusCode.Conflict);
             }
 
@@ -61,7 +65,17 @@ namespace Pharmacy.System.Services.Services
 
             return Response.Success();
         }
-
+        private async Task TryDeleteImageAsync(string imageName)
+        {
+            try
+            {
+                await FileHelper.DeleteFileAsync(imageName, "ProductImages");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to delete image {ImageName}", imageName);
+            }
+        }
 
 
         public async Task<Response> CreateAsync(ProductDto dto)
@@ -121,19 +135,45 @@ namespace Pharmacy.System.Services.Services
             _unitOfWork.ProductRepository.Delete(product);
             await _unitOfWork.CompleteAsync();
 
-           return Response.Success(
-                message: "Product deleted successfully",
-                statusCode: (int)HttpStatusCode.OK);
+            if (product.Image != null)
+            {
+                try
+                {
+                    await FileHelper.DeleteFileAsync(product.Image, "ProductImages");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to delete image {ImageName} for product {ProductId}", product.Image, product.Id);
+                }
+            }
+
+            return Response.Success(
+            message: "Product deleted successfully",
+            statusCode: (int)HttpStatusCode.OK);
         }
 
-        public Task<Response> GetAllAsync(ProductSpecParams specParams)
+        public async Task<Response> GetAllAsync(ProductSpecParams specParams)
         {
-            throw new global::System.NotImplementedException();
+            var countSpec = new ProductSpecification(specParams, true);
+            var count = await _unitOfWork.ProductRepository.GetCountWithSpecAsync(countSpec);
+
+            var spec = new ProductSpecification(specParams);
+            var data = await _unitOfWork.ProductRepository.GetAllWithSpecAsync(spec);
+
+            var pagination = new Pagination(
+                specParams.PageIndex,
+                specParams.PageSize, 
+                count,
+                data.Adapt<List<ProductDetailsDto>>());
+
+            return Response.Success(
+                data: pagination,
+                message: "Products retrieved successfully");
         }
 
         public async Task<Response> GetByIdAsync(int id)
         {
-            var product = await _unitOfWork.ProductRepository.GetByIdAsync(id);
+            var product = await _unitOfWork.ProductRepository.GetWithSpecAsync(new ProductSpecification(id));
             if (product == null)
             {
                 return Response.Fail(
@@ -147,9 +187,45 @@ namespace Pharmacy.System.Services.Services
                 statusCode: (int)HttpStatusCode.OK);
         }
 
-        public Task<Response> UpdateAsync(int id, ProductDto dto)
+        public async Task<Response> UpdateAsync(int id, ProductDto dto)
         {
-            throw new global::System.NotImplementedException();
+            var product = await _unitOfWork.ProductRepository.GetWithSpecAsync(new ProductSpecification(id));
+            if (product == null)
+                return Response.Fail(message: "Product not found!", statusCode: (int)HttpStatusCode.NotFound);
+
+            var validationResult = await ValidateProductDto(dto, excludeProductId: id);
+            if (!validationResult.IsSuccess)
+                return validationResult;
+
+            var oldImage = product.Image;
+            string? newImage = null;
+
+            dto.Adapt(product);
+
+            if (dto.Image != null)
+            {
+                newImage = await FileHelper.UploadFileAsync(dto.Image, "ProductImages");
+                product.Image = newImage;
+            }
+
+            try
+            {
+                await _unitOfWork.CompleteAsync();
+            }
+            catch (Exception)
+            {
+                if (newImage != null)
+                    await TryDeleteImageAsync(newImage); 
+                throw;
+            }
+
+            if (newImage != null && !string.IsNullOrEmpty(oldImage))
+                await TryDeleteImageAsync(oldImage);       
+
+            return Response.Success(
+                data: product.Adapt<ProductDetailsDto>(),
+                message: "Product updated successfully",
+                statusCode: (int)HttpStatusCode.OK);
         }
     }
 }

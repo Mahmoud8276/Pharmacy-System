@@ -488,3 +488,6 @@ $RECYCLE.BIN/
 **/appsettings.Production.json
 
 src/Pharmacy.System.Api/wwwroot/files/UserImages/*
+
+docs/.$Database Schema.drawio.bkp
+docs/.$Database Schema.drawio.dtmp

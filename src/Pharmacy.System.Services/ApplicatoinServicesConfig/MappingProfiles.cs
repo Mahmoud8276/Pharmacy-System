@@ -18,12 +18,19 @@ namespace Pharmacy.System.Services.ApplicatoinServicesConfig
 
             TypeAdapterConfig<AppUser, UserDetailsDto>
                 .NewConfig()
-                .Map(dest => dest.ImageUrl, src => $"{BaseUrl}/files/UserImages/{src.Image}");
+                .Map(dest => dest.ImageUrl, src => src.Image == null? null : $"{BaseUrl}/files/UserImages/{src.Image}");
 
 
             TypeAdapterConfig<Product, ProductDetailsDto>
                 .NewConfig()
-                .Map(dest => dest.Image, src => $"{BaseUrl}/files/ProductImages/{src.Image}");
+                .Map(dest => dest.Image, src => src.Image == null ? null : $"{BaseUrl}/files/ProductImages/{src.Image}")
+                .Map(dest => dest.ActiveIngredients, src => src.ProductActiveIngredients);
+
+            TypeAdapterConfig<ProductActiveIngredient, ProductActiveIngredientDetailsDto>
+                .NewConfig()
+                .Map(dest => dest.Name, src => src.ActiveIngredient.Name)
+                .Map(dest => dest.Id, src => src.ActiveIngredient.Id)
+                .Map(dest => dest.Description, src => src.ActiveIngredient.Description);
 
             return services;
         }

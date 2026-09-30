@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Pharmacy.System.Core.Models
 {
-    public class ProductActiveIngredient
+    public class ProductActiveIngredient : BaseModel<int>
     {
         [ForeignKey("Product")]
         public int ProductId { get; set; }

@@ -8,12 +8,14 @@ namespace Pharmacy.System.Infrastructure.ModelsConfig
     {
         public void Configure(EntityTypeBuilder<ProductActiveIngredient> builder)
         {
-            builder.HasKey(x =>
+            builder.HasKey(x => x.Id);
+
+            builder.HasIndex(x =>
             new
             {
                 x.ProductId,
                 x.ActiveIngredientId
-            });
+            }).IsUnique();
         }
     }
 }

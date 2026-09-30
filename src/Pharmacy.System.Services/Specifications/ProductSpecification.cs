@@ -21,6 +21,7 @@ namespace Pharmacy.System.Services.Specifications
             AddInclude(x => x.Manufacturer);
             AddInclude(x => x.ProductActiveIngredients);
             AddInclude(x => x.ProductPackagingLevels);
+            AddInclude("ProductActiveIngredients.ActiveIngredient");
         }
 
         public ProductSpecification(int ProductId) : base(x => x.Id == ProductId)
@@ -30,6 +31,7 @@ namespace Pharmacy.System.Services.Specifications
             AddInclude(x => x.Manufacturer);
             AddInclude(x => x.ProductActiveIngredients);
             AddInclude(x => x.ProductPackagingLevels);
+            AddInclude("ProductActiveIngredients.ActiveIngredient");
         }
 
         private static Expression<Func<Product, bool>> BuildCriteria(IProductSpecParams specParams)

@@ -1,6 +1,7 @@
 ﻿using Mapster;
 using Microsoft.Extensions.Logging;
 using Pharmacy.System.Core.Dtos;
+using Pharmacy.System.Core.Dtos.ProductActiveIngredientDtos;
 using Pharmacy.System.Core.Dtos.ProductDtos;
 using Pharmacy.System.Core.Interfaces;
 using Pharmacy.System.Core.Models;
@@ -13,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Pharmacy.System.Services.Services
 {
@@ -116,10 +118,13 @@ namespace Pharmacy.System.Services.Services
                 throw;
             }
 
-                return Response.Success(
-                data: product.Adapt<ProductDetailsDto>(),
-                message: "Product created successfully",
-                statusCode: (int)HttpStatusCode.Created);
+            var createdProduct = await _unitOfWork.ProductRepository
+                .GetWithSpecAsync(new ProductSpecification(product.Id));
+
+            return Response.Success(
+            data: createdProduct.Adapt<ProductDetailsDto>(),
+            message: "Product created successfully",
+            statusCode: (int)HttpStatusCode.Created);
         }
 
         public async Task<Response> DeleteAsync(int id)
@@ -225,6 +230,298 @@ namespace Pharmacy.System.Services.Services
             return Response.Success(
                 data: product.Adapt<ProductDetailsDto>(),
                 message: "Product updated successfully",
+                statusCode: (int)HttpStatusCode.OK);
+        }
+
+
+
+
+        public async Task<Response> AddProductActiveIngredientAsync(int productId, int activeIngredientId, ProductActiveIngredientDto dto)
+        {
+            if(!await _unitOfWork.ProductRepository.AnyAsync(x=>x.Id == productId))
+            {
+                return Response.Fail(
+                    message: "Product Not Fount",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            var activeIngredient = await _unitOfWork.ActiveIngredientRepository.GetByIdAsync(activeIngredientId);
+            if(activeIngredient == null)
+            {
+                return Response.Fail(
+                    message: "Active Ingredient Not Fount",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            if (!await _unitOfWork.ProductActiveIngredientRepository.
+                AnyAsync(x=>x.ActiveIngredientId == activeIngredientId && x.ProductId == productId))
+            {
+                return Response.Fail(
+                    message: "Active Ingredient Exists For This Product!",
+                    statusCode: (int)HttpStatusCode.Conflict);
+            }
+
+            await _unitOfWork.ProductActiveIngredientRepository.AddAsync(new ProductActiveIngredient()
+            {
+                ProductId = productId,
+                ActiveIngredient = activeIngredient,
+                Quantity = dto.Quantity,
+                Unit = dto.Unit
+            });
+            await _unitOfWork.CompleteAsync();
+
+
+            return Response.Success(
+                message: $"Active Ingredient Added For The Product Successfully",
+                data: activeIngredient.Adapt<ProductActiveIngredientDetailsDto>(),
+                statusCode: (int)HttpStatusCode.Created);
+        }
+
+        public async Task<Response> AddProductActiveIngredientsAsync(int productId, List<ProductActiveIngredientAssociationDto> dtos)
+        {
+            //Check the existence of the product
+            if (!await _unitOfWork.ProductRepository.AnyAsync(x=>x.Id == productId))
+            {
+                return Response.Fail(
+                    message: "Product Not Fount",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            //Check the douplication of the active Ingredients in the incoming request
+            var incomingActiveIngredientsIds = dtos.Select(x => x.ActiveIngredientId).ToList();
+            if(incomingActiveIngredientsIds.Distinct().Count() != incomingActiveIngredientsIds.Count())
+            {
+                return Response.Fail(message: "Duplicate active ingredient in request!");
+            }
+
+            //Check the existence of the active Ingredients
+            var validActiveIngredients = await _unitOfWork.ActiveIngredientRepository.
+                FindAsync(x => incomingActiveIngredientsIds.Contains(x.Id));
+            if (validActiveIngredients.Count != incomingActiveIngredientsIds.Count)
+            {
+                return Response.Fail(
+                    message: "One or more active ingredients not found!",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            //Check if any of the incoming active ingredients already associated with the product
+            if (await _unitOfWork.ProductActiveIngredientRepository
+                .AnyAsync(x => incomingActiveIngredientsIds.Contains(x.ActiveIngredientId) && x.ProductId == productId))
+            {
+                return Response.Fail(
+                    message: "One or more active ingredients already associated with this product!",
+                    statusCode: (int)HttpStatusCode.Conflict);
+            }
+
+            //Associate the active ingredients with the product
+            var incomingIngredientDetails = dtos.ToDictionary(x => x.ActiveIngredientId);
+            var poductIngredientsToBeAdded = validActiveIngredients.Select(
+                x => new ProductActiveIngredient()
+                {
+                    ActiveIngredient = x,
+                    ProductId = productId,
+                    Quantity = incomingIngredientDetails[x.Id].Quantity,
+                    Unit = incomingIngredientDetails[x.Id].Unit
+                }).ToList();
+            
+            await _unitOfWork.ProductActiveIngredientRepository.AddRangeAsync(poductIngredientsToBeAdded);
+            await _unitOfWork.CompleteAsync();
+
+            return Response.Success(
+                message: "Active Ingredients Added Successfully",
+                data: poductIngredientsToBeAdded.Adapt<List<ProductActiveIngredientDetailsDto>>());
+        }
+
+        public async Task<Response> GetProductActiveIngredientsAsync(int productId)
+        {
+            var product = await _unitOfWork.ProductRepository.GetWithSpecAsync(new ProductSpecification(productId));
+            if (product == null)
+            {
+                return Response.Fail(
+                    message: "Product Not Fount",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            return Response.Success(
+                message: "Product Active Ingredients Retreived Successfully",
+                data: product.ProductActiveIngredients.Adapt<List<ProductActiveIngredientDetailsDto>>());
+        }
+
+        public async Task<Response> UpdateProductActiveIngredientAsync(int productId, int activeIngredientId, ProductActiveIngredientDto dto)
+        {
+            var product = await _unitOfWork.ProductRepository.
+                GetWithSpecAsync(new ProductSpecification(productId));
+            if (product == null)
+            {
+                return Response.Fail(
+                    message: "Product Not Fount",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            if(!await _unitOfWork.ActiveIngredientRepository.AnyAsync(x=>x.Id == activeIngredientId))
+            {
+                return Response.Fail(
+                     message: "Active Ingredient Not Fount",
+                     statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            var association = await _unitOfWork.ProductActiveIngredientRepository
+                .GetWithSpecAsync(new ProductActiveIngredientSpecification(productId, activeIngredientId));
+            if(association == null)
+            {
+                return Response.Fail(
+                    message: "Active Ingredient Not Associated With This Product",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            dto.Adapt(association);
+            await _unitOfWork.CompleteAsync();
+
+            return Response.Success(
+                message: "Product Active Ingredient Updated Successfully",
+                data: association.Adapt<ProductActiveIngredientDetailsDto>());
+        }
+
+        public async Task<Response> UpdateProductActiveIngredientsAsync(int productId, List<ProductActiveIngredientAssociationDto> dtos)
+        {
+            //Check the existence of the product
+            if (!await _unitOfWork.ProductRepository.AnyAsync(x => x.Id == productId))
+            {
+                return Response.Fail(
+                    message: "Product Not Fount",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            //Check the douplication of the active Ingredients in the incoming request
+            var incomingActiveIngredientsIds = dtos.Select(x => x.ActiveIngredientId).ToList();
+            if (incomingActiveIngredientsIds.Distinct().Count() != incomingActiveIngredientsIds.Count())
+            {
+                return Response.Fail(message: "Duplicate active ingredient in request!");
+            }
+
+            //Check the existence of the active Ingredients
+            var validActiveIngredients = await _unitOfWork.ActiveIngredientRepository.
+                FindAsync(x => incomingActiveIngredientsIds.Contains(x.Id));
+            if (validActiveIngredients.Count != incomingActiveIngredientsIds.Count)
+            {
+                return Response.Fail(
+                    message: "One or more active ingredients not found!",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            //1.Get products active ingredients
+            var existingAssociations = await _unitOfWork.ProductActiveIngredientRepository
+                .FindAsync(x => x.ProductId == productId);
+
+            //2.Get the associations that must be added
+            var associationsToBeAdded = validActiveIngredients
+                .Where(x => !existingAssociations.Any(e => e.ActiveIngredientId == x.Id))
+                .Select(x => new ProductActiveIngredient()
+                {
+                    ProductId = productId,
+                    ActiveIngredient = x,
+                    Quantity = dtos.First(d => d.ActiveIngredientId == x.Id).Quantity,
+                    Unit = dtos.First(d => d.ActiveIngredientId == x.Id).Unit
+                }).ToList();
+
+            if(associationsToBeAdded.Count > 0)
+            {
+                await _unitOfWork.ProductActiveIngredientRepository.AddRangeAsync(associationsToBeAdded);
+            }
+
+            //3.Get the associations that must be updated
+            var associationsToBeUpdated = existingAssociations
+                .Where(x => incomingActiveIngredientsIds.Contains(x.ActiveIngredientId))
+                .ToList();
+
+            if(associationsToBeUpdated.Count > 0)
+            {
+                foreach (var association in associationsToBeUpdated)
+                {
+                    var incomingDto = dtos.First(d => d.ActiveIngredientId == association.ActiveIngredientId);
+                    association.Quantity = incomingDto.Quantity;
+                    association.Unit = incomingDto.Unit;
+                }
+            }
+
+            //4.Get the associations that must be removed
+            var associationsToBeRemoved = existingAssociations
+                .Where(x => !incomingActiveIngredientsIds.Contains(x.ActiveIngredientId))
+                .ToList();
+
+            if (associationsToBeRemoved.Count > 0)
+            {
+                _unitOfWork.ProductActiveIngredientRepository.DeleteRange(associationsToBeRemoved);
+            }
+
+            await _unitOfWork.CompleteAsync();
+
+            var finalAssociations = existingAssociations
+                .Except(associationsToBeRemoved)
+                .Concat(associationsToBeAdded)
+                .ToList();
+
+            return Response.Success(
+                message: "Product Active Ingredients Updated Successfully",
+                data: finalAssociations.Adapt<List<ProductActiveIngredientDetailsDto>>());
+        }
+
+        public async Task<Response> DeleteProductActiveIngredientAsync(int productId, int activeIngredientId)
+        {
+            if(!await _unitOfWork.ProductRepository.AnyAsync(x => x.Id == productId))
+            {
+                return Response.Fail(
+                    message: "Product Not Fount",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            if(!await _unitOfWork.ActiveIngredientRepository.AnyAsync(x => x.Id == activeIngredientId))
+            {
+                return Response.Fail(
+                    message: "Active Ingredient Not Fount",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            var association = await _unitOfWork.ProductActiveIngredientRepository
+                .GetWithSpecAsync(new ProductActiveIngredientSpecification(productId, activeIngredientId));
+            if (association == null)
+            {
+                return Response.Fail(
+                    message: "Active Ingredient Not Associated With This Product",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            _unitOfWork.ProductActiveIngredientRepository.Delete(association);
+            await _unitOfWork.CompleteAsync();
+
+            return Response.Success(
+                message: "Product Active Ingredient Deleted Successfully",
+                statusCode: (int)HttpStatusCode.OK);
+        }
+
+        public async Task<Response> DeleteProductActiveIngredientsAsync(int productId)
+        {
+            if(!await _unitOfWork.ProductRepository.AnyAsync(x => x.Id == productId))
+            {
+                return Response.Fail(
+                    message: "Product Not Fount",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            var associations = await _unitOfWork.ProductActiveIngredientRepository
+                .FindAsync(x => x.ProductId == productId);
+            if (associations.Count == 0)
+            {
+                return Response.Fail(
+                    message: "No Active Ingredients Associated With This Product",
+                    statusCode: (int)HttpStatusCode.NotFound);
+            }
+
+            _unitOfWork.ProductActiveIngredientRepository.DeleteRange(associations);
+            await _unitOfWork.CompleteAsync();
+
+            return Response.Success(
+                message: "All Product Active Ingredients Deleted Successfully",
                 statusCode: (int)HttpStatusCode.OK);
         }
     }

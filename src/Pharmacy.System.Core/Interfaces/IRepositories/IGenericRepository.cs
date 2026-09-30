@@ -12,6 +12,7 @@ namespace Pharmacy.System.Core.Interfaces.IRepositories
         public Task<IReadOnlyList<TModel>> FindAsync(Expression<Func<TModel, bool>> condition);
         public Task<bool> AnyAsync(Expression<Func<TModel, bool>> condition);
         public Task<IReadOnlyList<TModel>> GetAllAsync();
+        public Task<int> CountAsync(Expression<Func<TModel, bool>> condition);
         public Task AddAsync(TModel model);
         public Task AddRangeAsync(IEnumerable<TModel> models);
         public void Update(TModel model);

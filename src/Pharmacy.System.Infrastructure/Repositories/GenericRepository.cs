@@ -24,6 +24,11 @@ namespace Pharmacy.System.Infrastructure.Repositories
             return await _context.Set<TModel>().ToListAsync();
         }
 
+        public async Task<int> CountAsync(Expression<Func<TModel, bool>> condition)
+        {
+            return await _context.Set<TModel>().CountAsync(condition);
+        }
+
         public async Task<IReadOnlyList<TModel>> GetAllWithSpecAsync(ISpecification<TModel, TKey> spec)
         {
             return await SpecificationEvaluator<TModel, TKey>.GetQuery(_context.Set<TModel>().AsQueryable(), spec).ToListAsync();

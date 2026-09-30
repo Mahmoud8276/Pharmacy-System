@@ -16,6 +16,8 @@ namespace Pharmacy.System.Infrastructure.Repositories
         private readonly Lazy<IManufactorerRepository> _manufacturerRepository;
         private readonly Lazy<IProductFormRepository> _productFormRepository;
         private readonly Lazy<IBaseUnitRepository> _baseUnitRepository;
+        private readonly Lazy<IActiveIngredientRepository> _activeIngredientRepository;
+        private readonly Lazy<IProductActiveIngredientRepository> _productActiveIngredientRepository;
 
 
         public UnitOfWork(AppDbContext context)
@@ -27,6 +29,8 @@ namespace Pharmacy.System.Infrastructure.Repositories
             _manufacturerRepository = new Lazy<IManufactorerRepository>(() => new ManufactorerRepository(_context));
             _productFormRepository = new Lazy<IProductFormRepository>(() => new ProductFormRepository(_context));
             _baseUnitRepository = new Lazy<IBaseUnitRepository>(() => new BaseUnitRepository(_context));
+            _activeIngredientRepository = new Lazy<IActiveIngredientRepository>(() => new ActiveIngredientRepository(_context));
+            _productActiveIngredientRepository = new Lazy<IProductActiveIngredientRepository>(() => new ProductActiveIngredientRepository(_context));
         }
 
         public IProductRepository ProductRepository => _productRepository.Value;
@@ -34,6 +38,8 @@ namespace Pharmacy.System.Infrastructure.Repositories
         public IManufactorerRepository ManufacturerRepository => _manufacturerRepository.Value;
         public IProductFormRepository ProductFormRepository => _productFormRepository.Value;
         public IBaseUnitRepository BaseUnitRepository => _baseUnitRepository.Value;
+        public IActiveIngredientRepository ActiveIngredientRepository => _activeIngredientRepository.Value;
+        public IProductActiveIngredientRepository ProductActiveIngredientRepository => _productActiveIngredientRepository.Value;
 
 
 

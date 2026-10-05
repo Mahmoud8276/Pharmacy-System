@@ -17,7 +17,6 @@ namespace Pharmacy.System.Core.Dtos.ProductDtos
         public ProductCategoryDetailsDto Category { get; set; }
         public ProductFormDetailsDto ProductForm { get; set; }
         public List<ProductActiveIngredientDetailsDto> ActiveIngredients { get; set; } = new List<ProductActiveIngredientDetailsDto>();
-        public List<ProductPackagingLevelDetailsDto> Packaging { get; set; } = new List<ProductPackagingLevelDetailsDto>();
 
     }
 }

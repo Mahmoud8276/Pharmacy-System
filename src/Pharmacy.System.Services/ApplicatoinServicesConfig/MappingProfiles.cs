@@ -4,6 +4,7 @@ using Mapster;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pharmacy.System.Core.Dtos.ProductDtos;
+using Pharmacy.System.Core.Dtos.ProductPackagingDtos;
 
 namespace Pharmacy.System.Services.ApplicatoinServicesConfig
 {
@@ -31,6 +32,11 @@ namespace Pharmacy.System.Services.ApplicatoinServicesConfig
                 .Map(dest => dest.Name, src => src.ActiveIngredient.Name)
                 .Map(dest => dest.Id, src => src.ActiveIngredient.Id)
                 .Map(dest => dest.Description, src => src.ActiveIngredient.Description);
+
+            TypeAdapterConfig<ProductPackagingLevel, ProductPacagingDetailsDto>
+                .NewConfig()
+                .Map(dest => dest.PackagingUnitName, src => src.PackagingUnit.Name)
+                .Map(dest => dest.ChildPackagingUnitQuantity, src => src.QuantityOfChildPackage);
 
             return services;
         }

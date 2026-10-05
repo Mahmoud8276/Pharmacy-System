@@ -253,7 +253,7 @@ namespace Pharmacy.System.Services.Services
                     statusCode: (int)HttpStatusCode.NotFound);
             }
 
-            if (!await _unitOfWork.ProductActiveIngredientRepository.
+            if (await _unitOfWork.ProductActiveIngredientRepository.
                 AnyAsync(x=>x.ActiveIngredientId == activeIngredientId && x.ProductId == productId))
             {
                 return Response.Fail(
@@ -524,5 +524,9 @@ namespace Pharmacy.System.Services.Services
                 message: "All Product Active Ingredients Deleted Successfully",
                 statusCode: (int)HttpStatusCode.OK);
         }
+
+
+
+        
     }
 }

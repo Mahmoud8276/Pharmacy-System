@@ -13,7 +13,7 @@ namespace Pharmacy.System.Core.Models
         public PackagingUnit PackagingUnit { get; set; }
 
         [ForeignKey("Parent")]
-        public int? ParentId { get; set; }
+        public int? ParentId { get; set; } = null;
         public ProductPackagingLevel Parent {  get; set; }
 
         public decimal QuantityOfChildPackage { get; set; }

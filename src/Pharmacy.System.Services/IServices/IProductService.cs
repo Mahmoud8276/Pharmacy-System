@@ -119,5 +119,6 @@ namespace Pharmacy.System.Services.IServices
         /// <param name="productId">The id of the product.</param>
         /// <returns>A <see cref="Response"/> indicating success, or a not-found response if the product does not exist.</returns>
         public Task<Response> DeleteProductActiveIngredientsAsync(int productId);
+
     }
 }

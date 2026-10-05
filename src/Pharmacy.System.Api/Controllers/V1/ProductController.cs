@@ -1,7 +1,9 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using Pharmacy.System.Api.Responses;
 using Pharmacy.System.Core.Dtos.ProductActiveIngredientDtos;
 using Pharmacy.System.Core.Dtos.ProductDtos;
+using Pharmacy.System.Core.Dtos.ProductPackagingDtos;
 using Pharmacy.System.Services.IServices;
 using Pharmacy.System.Services.SpecificationParams;
 using System.Collections.Generic;
@@ -13,9 +15,13 @@ namespace Pharmacy.System.Api.Controllers.V1
     public class ProductController : BaseController
     {
         private readonly IProductService _productService;
-        public ProductController(IProductService productService)
+        private readonly IProductPackagingService _productPackagingService;
+        public ProductController(
+            IProductService productService,
+            IProductPackagingService productPackagingService)
         {
             _productService = productService;
+            _productPackagingService = productPackagingService;
         }
 
 
@@ -61,6 +67,11 @@ namespace Pharmacy.System.Api.Controllers.V1
             int productId, 
             List<ProductActiveIngredientAssociationDto> dtos)
         {
+            if(dtos.Count == 0)
+            {
+                return BadRequest(ApiResponse.Fail(message: "The list of active ingredients cannot be empty."));
+            }
+
             var result = await _productService.AddProductActiveIngredientsAsync(productId, dtos);
             return StatusCode(result.StatusCode, result);
         }
@@ -91,6 +102,11 @@ namespace Pharmacy.System.Api.Controllers.V1
             int productId,
             List<ProductActiveIngredientAssociationDto> dtos)
         {
+            if (dtos.Count == 0)
+            {
+                return BadRequest(ApiResponse.Fail(message: "The list of active ingredients cannot be empty."));
+            }
+
             var result = await _productService.UpdateProductActiveIngredientsAsync(productId, dtos);
             return StatusCode(result.StatusCode, result);
         }
@@ -118,6 +134,51 @@ namespace Pharmacy.System.Api.Controllers.V1
         public async Task<IActionResult> DeleteProductActiveIngredientAsync(int productId, int activeIngredientId)
         {
             var result = await _productService.DeleteProductActiveIngredientAsync(productId, activeIngredientId);
+            return StatusCode(result.StatusCode, result);
+        }
+
+
+
+
+        [HttpPost("{productId}/packaging")]
+        public async Task<IActionResult> AddProductPackagingAsync(int productId, ProductPackagingDto dto)
+        {
+            var result = await _productPackagingService.CreateAsync(productId, dto);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("{productId}/packaging")]
+        public async Task<IActionResult> GetAllProductPackagingAsync(int productId)
+        {
+            var result = await _productPackagingService.GetProductPackagingLevelsAsync(productId);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPut("{productId}/packaging/{productPackagingId}")]
+        public async Task<IActionResult> UpdateProductPackagingAsync(int productId, int productPackagingId, UpdateProductPackagingDto dto)
+        {
+            var result = await _productPackagingService.UpdateAsync(productId, productPackagingId, dto);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("{productId}/packaging")]
+        public async Task<IActionResult> DeleteProductPackagingLevelsAsync(int productId)
+        {
+            var result = await _productPackagingService.DeleteProductPackagingLevelsAsync(productId);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("{productId}/packaging/{productPackagingId}")]
+        public async Task<IActionResult> DeleteProductPackagingAsync(int productId, int productPackagingId)
+        {
+            var result = await _productPackagingService.DeleteAsync(productId, productPackagingId);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("{productId}/packaging/base-unit")]
+        public async Task<IActionResult> GetProductBaseUnitAsync(int productId)
+        {
+            var result = await _productPackagingService.GetProductBaseUnit(productId);
             return StatusCode(result.StatusCode, result);
         }
     }

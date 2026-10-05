@@ -19,6 +19,7 @@ namespace Pharmacy.System.Services.ApplicatoinServicesConfig
              services.AddScoped<IProductFormService, ProductFormService>();
              services.AddScoped<IActiveIngredientService, ActiveIngredientService>();
              services.AddScoped<IPackagingUnitService, PackagingUnitService>();
+             services.AddScoped<IProductPackagingService, ProductPackagingService>();
 
             return services;
         }

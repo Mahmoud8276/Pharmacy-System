@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pharmacy.System.Infrastruct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pharmacy.System.Services", "src\Pharmacy.System.Services\Pharmacy.System.Services.csproj", "{C5FFB2C3-2815-4B60-AA5A-D36C213D4BE8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pharmacy.System.UnitTests", "tests\Pharmacy.System.UnitTests\Pharmacy.System.UnitTests.csproj", "{CAB3E417-C605-4A62-BF8B-0DA526901800}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,18 @@ Global
 		{C5FFB2C3-2815-4B60-AA5A-D36C213D4BE8}.Release|x64.Build.0 = Release|Any CPU
 		{C5FFB2C3-2815-4B60-AA5A-D36C213D4BE8}.Release|x86.ActiveCfg = Release|Any CPU
 		{C5FFB2C3-2815-4B60-AA5A-D36C213D4BE8}.Release|x86.Build.0 = Release|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Debug|x64.Build.0 = Debug|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Debug|x86.Build.0 = Debug|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Release|x64.ActiveCfg = Release|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Release|x64.Build.0 = Release|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Release|x86.ActiveCfg = Release|Any CPU
+		{CAB3E417-C605-4A62-BF8B-0DA526901800}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

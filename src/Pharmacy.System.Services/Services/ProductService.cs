@@ -31,7 +31,7 @@ namespace Pharmacy.System.Services.Services
             _logger = logger;
         }
 
-        private async Task<Response> ValidateProductDto(ProductDto dto, int? excludeProductId = null)
+        private async Task<Response> ValidateProductDtoAsync(ProductDto dto, int? excludeProductId = null)
         {
             if (await _unitOfWork.ProductRepository.AnyAsync(x =>
                     x.Barcode == dto.Barcode && (excludeProductId == null || x.Id != excludeProductId)))
@@ -82,7 +82,7 @@ namespace Pharmacy.System.Services.Services
 
         public async Task<Response> CreateAsync(ProductDto dto)
         {
-            var validationResult = await ValidateProductDto(dto);
+            var validationResult = await ValidateProductDtoAsync(dto);
             if(validationResult.IsSuccess == false)
             {
                 return validationResult;
@@ -198,7 +198,7 @@ namespace Pharmacy.System.Services.Services
             if (product == null)
                 return Response.Fail(message: "Product not found!", statusCode: (int)HttpStatusCode.NotFound);
 
-            var validationResult = await ValidateProductDto(dto, excludeProductId: id);
+            var validationResult = await ValidateProductDtoAsync(dto, excludeProductId: id);
             if (!validationResult.IsSuccess)
                 return validationResult;
 
